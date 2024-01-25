@@ -47,7 +47,7 @@ class Invoice
      */
     public function date($timezone = null): Carbon
     {
-        $carbon = Carbon::instance($this->transaction->createdAt);
+        $carbon = Carbon::instance(is_string($this->transaction->createdAt) ? Carbon::parse($this->transaction->createdAt) : $this->transaction->createdAt);
 
         return $timezone ? $carbon->setTimezone($timezone) : $carbon;
     }
@@ -218,7 +218,8 @@ class Invoice
     public function view(array $data): ViewContract
     {
         return View::make('cashier::receipt', array_merge(
-            $data, ['invoice' => $this, 'owner' => $this->owner, 'user' => $this->owner]
+            $data,
+            ['invoice' => $this, 'owner' => $this->owner, 'user' => $this->owner]
         ));
     }
 
@@ -231,11 +232,11 @@ class Invoice
      */
     public function pdf(array $data)
     {
-        if (! defined('DOMPDF_ENABLE_AUTOLOAD')) {
+        if (!defined('DOMPDF_ENABLE_AUTOLOAD')) {
             define('DOMPDF_ENABLE_AUTOLOAD', false);
         }
 
-        if (file_exists($configPath = base_path().'/vendor/dompdf/dompdf/dompdf_config.inc.php')) {
+        if (file_exists($configPath = base_path() . '/vendor/dompdf/dompdf/dompdf_config.inc.php')) {
             require_once $configPath;
         }
 
@@ -257,11 +258,11 @@ class Invoice
      */
     public function download(array $data): Response
     {
-        $filename = $data['product'].'_'.$this->date()->month.'_'.$this->date()->year.'.pdf';
+        $filename = $data['product'] . '_' . $this->date()->month . '_' . $this->date()->year . '.pdf';
 
         return new Response($this->pdf($data), 200, [
             'Content-Description' => 'File Transfer',
-            'Content-Disposition' => 'attachment; filename="'.$filename.'"',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             'Content-Transfer-Encoding' => 'binary',
             'Content-Type' => 'application/pdf',
         ]);
