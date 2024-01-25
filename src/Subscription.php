@@ -83,7 +83,7 @@ class Subscription extends Model
      */
     public function cancelled()
     {
-        return ! is_null($this->ends_at);
+        return !is_null($this->ends_at);
     }
 
     /**
@@ -93,7 +93,7 @@ class Subscription extends Model
      */
     public function onTrial()
     {
-        if (! is_null($this->trial_ends_at)) {
+        if (!is_null($this->trial_ends_at)) {
             return Carbon::today()->lt($this->trial_ends_at);
         }
 
@@ -107,8 +107,8 @@ class Subscription extends Model
      */
     public function onGracePeriod()
     {
-        if (! is_null($endsAt = $this->ends_at)) {
-            return Carbon::now()->lt(Carbon::instance($endsAt));
+        if (!is_null($endsAt = $this->ends_at)) {
+            return Carbon::now()->lt(Carbon::instance(is_string($endsAt) ? Carbon::parse($endsAt) : $endsAt));
         }
 
         return false;
@@ -150,7 +150,7 @@ class Subscription extends Model
     {
         $quantity = max(0, $quantity - 1);
 
-        $addonName = $this->braintree_plan.'-quantity';
+        $addonName = $this->braintree_plan . '-quantity';
 
         $options = ['remove' => [$addonName]];
 
@@ -182,9 +182,9 @@ class Subscription extends Model
             return $this->resume();
         }
 
-        if (! $this->active()) {
+        if (!$this->active()) {
             return $this->owner->newSubscription($this->name, $plan)
-                                ->skipTrial()->create();
+                ->skipTrial()->create();
         }
 
         $plan = BraintreeService::findPlan($plan);
@@ -211,7 +211,7 @@ class Subscription extends Model
                 'ends_at' => null,
             ])->save();
         } else {
-            throw new Exception('Braintree failed to swap plans: '.$response->message);
+            throw new Exception('Braintree failed to swap plans: ' . $response->message);
         }
 
         return $this;
@@ -241,8 +241,8 @@ class Subscription extends Model
         $currentPlan = BraintreeService::findPlan($this->braintree_plan);
 
         $discount = $this->switchingToMonthlyPlan($currentPlan, $plan)
-                                ? $this->getDiscountForSwitchToMonthly($currentPlan, $plan)
-                                : $this->getDiscountForSwitchToYearly();
+            ? $this->getDiscountForSwitchToMonthly($currentPlan, $plan)
+            : $this->getDiscountForSwitchToYearly();
 
         $options = [];
 
@@ -335,7 +335,7 @@ class Subscription extends Model
      */
     public function applyCoupon($coupon, $removeOthers = false)
     {
-        if (! $this->active()) {
+        if (!$this->active()) {
             throw new InvalidArgumentException('Unable to apply coupon. Subscription not active.');
         }
 
@@ -421,7 +421,7 @@ class Subscription extends Model
      */
     public function resume()
     {
-        if (! $this->onGracePeriod()) {
+        if (!$this->onGracePeriod()) {
             throw new LogicException('Unable to resume subscription that is not within grace period.');
         }
 
