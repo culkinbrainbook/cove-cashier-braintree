@@ -3,7 +3,7 @@
 namespace Laravel\Cashier\Http\Controllers;
 
 use Exception;
-use Illuminate\Http\Client\Request;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Response;
 use Laravel\Cashier\Subscription;
 use Braintree\WebhookNotification;
@@ -27,7 +27,7 @@ class WebhookController extends Controller
 
         // BraintreeWebhookEvent::dispatch($webhook->kind, $webhook);
 
-        // $method = 'handle' . Str::studly(str_replace('.', '_', $webhook->kind));
+        $method = 'handle' . Str::studly(str_replace('.', '_', $webhook->kind));
 
         if (method_exists($this, $method)) {
             return $this->{$method}($webhook);
